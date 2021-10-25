@@ -18,7 +18,7 @@ public class Menu {
     }
 
 
-    public void userGameModeChoice() throws FileNotFoundException {
+    public void userGameModeChoice(Board board) throws FileNotFoundException {
         boolean check = false;
         Scanner in = new Scanner(System.in);
 
@@ -33,7 +33,7 @@ public class Menu {
                 case 1:
                     System.out.println("You have chosen: Player Vs Computer");
                     check = true;
-                    playerVsComputer();
+                    playerVsComputer(board);
                     break;
 
                 default:
@@ -45,11 +45,11 @@ public class Menu {
     }
 
 
-    private void inGameChoice() throws FileNotFoundException {
+    private void inGameChoice(Board board) throws FileNotFoundException {
         boolean check = false;
         Scanner in = new Scanner(System.in);
 
-        Board board =  new Board();
+
 
         System.out.println("1. Auto place all ships");
         System.out.println("2. Place your own ships");
@@ -81,7 +81,7 @@ public class Menu {
         }while (!check);
     }
 
-    private void playerVsComputer() throws FileNotFoundException {
-        inGameChoice();
+    private void playerVsComputer(Board board) throws FileNotFoundException {
+        inGameChoice(board);
     }
 }

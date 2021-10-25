@@ -19,12 +19,14 @@ public class Checker {
             for (String digit: verticalBoarder) {
                 if (digit.equals(id)){
                     stateCheck++;
+                    break;
                 }
             }
             if (stateCheck == 1){
                 for (String letter: horizontalBoarder) {
                     if (letter.equals(positionH)){
                         stateCheck++;
+                        break;
                     }
                 }
             }
@@ -32,12 +34,14 @@ public class Checker {
                 for (String digit: verticalBoarder) {
                     if (digit.equals(positionV)){
                         stateCheck++;
+                        break;
                     }
                 }
             }
             if (stateCheck == 3){
                 if (alignment.equals("H") || alignment.equals("V")){
                     return true;
+
                 }
             }
         }
@@ -52,16 +56,75 @@ public class Checker {
         // 2 = input format A11
         int stateCheck = 0;
         int unknownIdentifier = 0;
-        if (toCheck.length() == 4){
+        if (toCheck.length() == 5){
             String id = Character.toString(toCheck.charAt(0));
             String positionH = Character.toString(toCheck.charAt(1));
-            String positionV = Character.toString(toCheck.charAt(2));
-            String positionUnknown = Character.toString(toCheck.charAt(3));
+            String positionUnknown = Character.toString(toCheck.charAt(2));
+            String positionV = Character.toString(toCheck.charAt(3));
             String alignment = Character.toString(toCheck.charAt(4));
 
             for (String digit: verticalBoarder) {
                 if (digit.equals(id)){
                     stateCheck++;
+                    break;
+                }
+            }
+            if (stateCheck == 1){
+                if (alignment.equals("H") || alignment.equals("V")){
+                    stateCheck++;
+
+                }
+            }
+            if (stateCheck == 2){
+                for (String letter: horizontalBoarder) {
+                    if (letter.equals(positionH)){
+                        stateCheck++;
+                        break;
+                    }
+                }
+            }
+            if (stateCheck == 3){
+                for (String letter: verticalBoarder) {
+                    if (letter.equals(positionV)){
+                        stateCheck++;
+                        break;
+                    }
+                }
+            }
+
+            if (stateCheck == 4){
+                for (String digit: verticalBoarder) {
+                    if (digit.equals(positionUnknown)) {
+                        unknownIdentifier = 2;
+                        break;
+                    }
+                }
+                for (String letter: horizontalBoarder) {
+                    if (letter.equals(positionUnknown)) {
+                        unknownIdentifier = 1;
+                        break;
+                    }
+                }
+            }
+
+        }
+
+        return unknownIdentifier;
+    }
+
+    public boolean coordinatesCheckFor6(String toCheck){
+        int stateCheck = 0;
+        if (toCheck.length() == 6){
+            String id = Character.toString(toCheck.charAt(0));
+            String positionH = Character.toString(toCheck.charAt(1));
+            String positionH2 = Character.toString(toCheck.charAt(2));
+            String positionV2 = Character.toString(toCheck.charAt(3));
+            String positionV = Character.toString(toCheck.charAt(4));
+            String alignment = Character.toString(toCheck.charAt(5));
+            for (String digit: verticalBoarder) {
+                if (digit.equals(id)){
+                    stateCheck++;
+                    break;
                 }
             }
             if (stateCheck == 1){
@@ -73,6 +136,7 @@ public class Checker {
                 for (String letter: horizontalBoarder) {
                     if (letter.equals(positionH)){
                         stateCheck++;
+                        break;
                     }
                 }
             }
@@ -80,25 +144,27 @@ public class Checker {
                 for (String letter: verticalBoarder) {
                     if (letter.equals(positionV)){
                         stateCheck++;
+                        break;
                     }
                 }
             }
-
             if (stateCheck == 4){
-                for (String digit: verticalBoarder) {
-                    if (digit.equals(positionUnknown)){
-                        unknownIdentifier = 2;
+                for (String letter: horizontalBoarder) {
+                    if (letter.equals(positionH2)) {
+                        stateCheck++;
+                        break;
                     }
                 }
-                for (String letter: horizontalBoarder) {
-                    if (letter.equals(positionUnknown)){
-                        unknownIdentifier = 1;
+            }
+            if (stateCheck == 5){
+                for (String digit: verticalBoarder){
+                    if (digit.equals(positionV2)){
+                        return true;
                     }
                 }
             }
 
         }
-
-        return unknownIdentifier;
+        return false;
     }
 }

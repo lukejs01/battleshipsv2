@@ -18,7 +18,7 @@ public class Main {
 
         Menu menu = new Menu();
         menu.displayMenu();
-        menu.userGameModeChoice();
+        menu.userGameModeChoice(board);
         board.renderBoard();
 
 
