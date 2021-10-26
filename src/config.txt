@@ -1,4 +1,4 @@
-Board:size,15
+Board:size,12
 Board:cellSize,2
 Boat:Carrier,5
 Boat:Battleship,4
