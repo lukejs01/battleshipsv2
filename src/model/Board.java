@@ -19,8 +19,10 @@ public class Board {
     List<List<Tile>> boardGrid = new ArrayList<>();
     List<Boat> boats = new FileHelper().readBoatToList();
     List<Boat> displayBoats = new ArrayList<>(boats);
+    List<Boat> inGameBoats = new ArrayList<>(boats);
 
     public int boatCheck = boats.size();
+    public boolean exitCase = false;
 
 
     private List<String> horizontalBoarder = new ArrayList<>(Arrays.asList("A","B","C","D","E","F","G","H","I","J"));
@@ -41,7 +43,7 @@ public class Board {
 
 
 
-    public void renderBoard(){
+    public void renderBoard(boolean hidden){
         int total = boardSize * cellSize;
         char c = ' ';
         int verticalBoarderCounter = 0;
@@ -82,7 +84,11 @@ public class Board {
                 } else if (i % cellSize == 0 || k % cellSize == 0) {
                     c = '-';
                 }else {
-                    c = boardGrid.get(i / 2).get(k / 2).state; // if c == 5 no state???? try
+                    if (hidden && boardGrid.get(i / 2).get(k / 2).state == 'S' ){
+                            c = ' ';
+                    } else {
+                        c = boardGrid.get(i / 2).get(k / 2).state;
+                    }
                 }
                 System.out.print(c);
                 c = ' ';
@@ -90,6 +96,7 @@ public class Board {
             System.out.println();
         }
     }
+
 
     public void setBoardDimensions() throws FileNotFoundException {
         FileHelper fileHelper = new FileHelper();
@@ -141,7 +148,7 @@ public class Board {
         }
     }
 
-    private void placeShipWithLength4(String userChoice){
+    private void placeShipWithLength4(String userChoice, boolean auto){
             boolean isValid = new Checker().coordinatesCheckFor4(userChoice);
             if (isValid){
                 boolean checkState = false;
@@ -157,24 +164,38 @@ public class Board {
                     positionH = horizontalToDigitConversion(positionH);
                     if (alignment.equals("H")){
                         if (Integer.parseInt(positionH) + boat.getBoatSize() > boardSize){
-                            System.out.println("Ship can't be placed there, try another co-ordinate!");
+                            if (!auto){
+                                System.out.println("Ship can't be placed there, try another co-ordinate!");
+
+                            }
                         } else {
                             for (int i = 0; i < boat.getBoatSize(); i++) {
                                 if (boardGrid.get(Integer.parseInt(positionV)).get(Integer.parseInt(positionH) + i).isHasShip()) {
                                     checkState = true;
-                                    System.out.println("A boat is already in this position");
+                                    if (!auto) {
+                                        System.out.println("A boat is already in this position");
+                                    }
                                     break;
 
                                 }
                             }
                             if (!checkState) {
-                                displayShipToConsole(boat);
+                                if (!auto){
+                                    displayShipToConsole(boat);
+                                }
                                 boatCheck = boatCheck - 1;
                                 for (int j = 0; j < boat.getBoatSize(); j++) {
 
                                     boardGrid.get(Integer.parseInt(positionV)).get(Integer.parseInt(positionH) + j).state = 'S';
                                     boardGrid.get(Integer.parseInt(positionV)).get(Integer.parseInt(positionH) + j).setHasShip(true);
-                                    boat.coordinatesOnBoard.add(digitToHorizontalConversion(positionH) + positionV);
+
+                                    String posHHolder = positionH;
+                                    if (Integer.parseInt(positionH) + j >= 10){
+                                        posHHolder = "A" + digitToHorizontalConversion(String.valueOf(((Integer.parseInt(positionH)+j)%10)));
+                                    } else {
+                                        posHHolder = digitToHorizontalConversion(String.valueOf(Integer.parseInt(positionH)+ j));
+                                    }
+                                    boat.coordinatesOnBoard.add(posHHolder + positionV);
                                     boat.setPlaced(true);
                                 }
                             }
@@ -182,25 +203,36 @@ public class Board {
                     }
                     if (alignment.equals("V")){
                         if (Integer.parseInt(positionV) + boat.getBoatSize() > boardSize){
-                            System.out.println("Ship can't be placed there, try another co-ordinate!");
+                            if (!auto){
+                                System.out.println("Ship can't be placed there, try another co-ordinate!");
+                            }
 
                         }else {
                             for (int i = 0; i < boat.getBoatSize(); i++) {
-//                            positionH = horizontalToDigitConversion(positionH);
                                 if (boardGrid.get(Integer.parseInt(positionV) + i).get(Integer.parseInt(positionH)).isHasShip()) {
                                     checkState = true;
-                                    System.out.println("A boat is already in this position");
+                                    if (!auto){
+                                        System.out.println("A boat is already in this position");
+                                    }
                                     break;
                                 }
                             }
                             if (!checkState){
                                 boatCheck = boatCheck - 1;
-                                displayShipToConsole(boat);
+                                if (!auto){
+                                    displayShipToConsole(boat);
+                                }
                                 for (int j = 0; j < boat.getBoatSize(); j++) {
 
                                     boardGrid.get(Integer.parseInt(positionV) + j).get(Integer.parseInt(positionH)).state = 'S';
                                     boardGrid.get(Integer.parseInt(positionV) + j).get(Integer.parseInt(positionH)).setHasShip(true);
-                                    boat.coordinatesOnBoard.add(digitToHorizontalConversion(positionH) + positionV);
+                                    String posVHolder = positionV;
+                                    if (Integer.parseInt(positionV) + j >= 10){
+                                        posVHolder = "0" + (((Integer.parseInt(positionV) + j)%10));
+                                    } else {
+                                        posVHolder = String.valueOf(Integer.parseInt(positionV) + j);
+                                    }
+                                    boat.coordinatesOnBoard.add(digitToHorizontalConversion(positionH) + posVHolder);
                                     boat.setPlaced(true);
 
                                 }
@@ -216,7 +248,7 @@ public class Board {
 
 }
 
-    private void placeShipWithLength5(String userChoice){
+    private void placeShipWithLength5(String userChoice, boolean auto){
             int isValid = new Checker().coordinatesCheckFor5(userChoice);
             if (isValid == 0){
                 System.out.println("ERROR! invalid input");
@@ -235,22 +267,31 @@ public class Board {
                     positionH2 = horizontalToDigitConversion(positionH2);
                     if (alignment.equals("H")){
                         if ((checkDoubleDigit(positionH,positionH2)) + boat.getBoatSize() > boardSize){
-                            System.out.println("Ship can't be placed there, try another co-ordinate!");
+                            if (!auto){
+                                System.out.println("Ship can't be placed there, try another co-ordinate!");
+                            }
                         }else {
                             for (int i = 0; i < boat.getBoatSize(); i++) {
                                 if (boardGrid.get(Integer.parseInt(positionV)).get(checkDoubleDigit(positionH,positionH2) + i).isHasShip()) {
                                     checkState = true;
-                                    System.out.println("A boat is already in this position");
+                                    if (!auto){
+                                        System.out.println("A boat is already in this position");
+                                    }
                                     break;
                                 }
                             }
                             if (!checkState){
                                 boatCheck = boatCheck - 1;
-                                displayShipToConsole(boat);
+                                if (!auto){
+                                    displayShipToConsole(boat);
+                                }
                                 for (int j = 0; j < boat.getBoatSize(); j++){
                                     boardGrid.get(Integer.parseInt(positionV)).get(checkDoubleDigit(positionH, positionH2) + j).state = 'S';
                                     boardGrid.get(Integer.parseInt(positionV)).get(checkDoubleDigit(positionH, positionH2) + j).setHasShip(true);
-                                    boat.coordinatesOnBoard.add(digitToHorizontalConversion(positionH) + digitToHorizontalConversion(positionH2) + positionV);
+
+
+                                    boat.coordinatesOnBoard.add(digitToHorizontalConversion(positionH)
+                                            + digitToHorizontalConversion(String.valueOf(Integer.parseInt(positionH2 )+ j)) + positionV);
                                     boat.setPlaced(true);
                                 }
                             }
@@ -258,26 +299,37 @@ public class Board {
                     }
                     if (alignment.equals("V")){
                         if (Integer.parseInt(positionV) + boat.getBoatSize() > boardSize){
-                            System.out.println("Ship can't be placed there, try another co-ordinate!");
+                            if (!auto){
+                                System.out.println("Ship can't be placed there, try another co-ordinate!");
+                            }
                         }else {
                             for (int i = 0; i < boat.getBoatSize(); i++) {
                                 if (boardGrid.get(Integer.parseInt(positionV) + i).get(checkDoubleDigit(positionH,positionH2)).isHasShip()) {
                                     checkState = true;
-                                    System.out.println("A boat is already in this position");
+                                    if (!auto){
+                                        System.out.println("A boat is already in this position");
+                                    }
                                     break;
                                 }
                             }
-                                if (!checkState){
-                                    boatCheck = boatCheck - 1;
+                            if (!checkState){
+                                boatCheck = boatCheck - 1;
+                                if (!auto){
                                     displayShipToConsole(boat);
-                                    for (int j = 0; j < boat.getBoatSize(); j++){
-                                        boardGrid.get(Integer.parseInt(positionV) + j).get(checkDoubleDigit(positionH,positionH2)).state = 'S';
-                                        boardGrid.get(Integer.parseInt(positionV) + j).get(checkDoubleDigit(positionH, positionH2)).setHasShip(true);
-                                        boat.coordinatesOnBoard.add(digitToHorizontalConversion(positionH) + digitToHorizontalConversion(positionH2) + positionV);
-                                        boat.setPlaced(true);
-                                    }
                                 }
-
+                                for (int j = 0; j < boat.getBoatSize(); j++){
+                                    boardGrid.get(Integer.parseInt(positionV) + j).get(checkDoubleDigit(positionH,positionH2)).state = 'S';
+                                    boardGrid.get(Integer.parseInt(positionV) + j).get(checkDoubleDigit(positionH, positionH2)).setHasShip(true);
+                                    String posVHolder = positionV;
+                                    if (Integer.parseInt(positionV) + j >= 10){
+                                        posVHolder = "0" + (((Integer.parseInt(positionV) + j)%10));
+                                    } else {
+                                        posVHolder = String.valueOf(Integer.parseInt(positionV) + j);
+                                    }
+                                    boat.coordinatesOnBoard.add(digitToHorizontalConversion(positionH) + digitToHorizontalConversion(positionH2) + posVHolder);
+                                    boat.setPlaced(true);
+                                }
+                            }
                         }
                     }
                 }
@@ -298,22 +350,34 @@ public class Board {
                     positionH = horizontalToDigitConversion(positionH);
                     if (alignment.equals("H")){
                         if (Integer.parseInt(positionH) + boat.getBoatSize() > boardSize){
-                            System.out.println("Ship can't be placed there, try another co-ordinate!");
+                            if (!auto){
+                                System.out.println("Ship can't be placed there, try another co-ordinate!");
+                            }
                         }else {
                             for (int i = 0; i < boat.getBoatSize(); i++) {
                                 if (boardGrid.get(checkDoubleDigit(positionV, positionV2)).get(Integer.parseInt(positionH) + i).isHasShip()) {
                                     checkState = true;
-                                    System.out.println("A boat is already in this position");
+                                    if (!auto){
+                                        System.out.println("A boat is already in this position");
+                                    }
                                     break;
                                 }
                             }
                             if (!checkState){
                                 boatCheck = boatCheck - 1;
-                                displayShipToConsole(boat);
+                                if (!auto){
+                                    displayShipToConsole(boat);
+                                }
                                 for (int j = 0; j < boat.getBoatSize(); j++){
                                     boardGrid.get(checkDoubleDigit(positionV, positionV2)).get(Integer.parseInt(positionH) + j).state = 'S';
                                     boardGrid.get(checkDoubleDigit(positionV, positionV2)).get(Integer.parseInt(positionH) + j).setHasShip(true);
-                                    boat.coordinatesOnBoard.add(digitToHorizontalConversion(positionH) + positionV + positionV2);
+                                    String posHHolder = positionH;
+                                    if (Integer.parseInt(positionH) + j >= 10){
+                                        posHHolder = "A" + digitToHorizontalConversion(String.valueOf(((Integer.parseInt(positionH)+j)%10)));
+                                    } else {
+                                        posHHolder = digitToHorizontalConversion(String.valueOf(Integer.parseInt(positionH)+ j));
+                                    }
+                                    boat.coordinatesOnBoard.add(posHHolder + positionV + positionV2);
                                     boat.setPlaced(true);
                                 }
                             }
@@ -321,18 +385,24 @@ public class Board {
                     }
                     if (alignment.equals("V")){
                         if (checkDoubleDigit(positionV, positionV2) + boat.getBoatSize() > boardSize){
-                            System.out.println("Ship can't be placed there, try another co-ordinate!");
+                            if (!auto){
+                                System.out.println("Ship can't be placed there, try another co-ordinate!");
+                            }
                         }else {
                             for (int i = 0; i < boat.getBoatSize(); i++) {
                                 if (boardGrid.get(checkDoubleDigit(positionV, positionV2) + i).get(Integer.parseInt(positionH)).isHasShip()) {
                                     checkState = true;
-                                    System.out.println("A boat is already in this position");
+                                    if (!auto){
+                                        System.out.println("A boat is already in this position");
+                                    }
                                     break;
                                 }
                             }
                             if (!checkState){
                                 boatCheck = boatCheck - 1;
-                                displayShipToConsole(boat);
+                                if (!auto){
+                                    displayShipToConsole(boat);
+                                }
                                 for (int j = 0; j < boat.getBoatSize(); j++){
                                     boardGrid.get(checkDoubleDigit(positionV, positionV2) + j).get(Integer.parseInt(positionH)).state = 'S';
                                     boardGrid.get(checkDoubleDigit(positionV, positionV2) + j).get(Integer.parseInt(positionH)).setHasShip(true);
@@ -350,7 +420,7 @@ public class Board {
 
     }
 
-    private void placeShipWithLength6(String userChoice){
+    private void placeShipWithLength6(String userChoice, boolean auto){
         if (userChoice.length() == 6){
             boolean isValid = new Checker().coordinatesCheckFor6(userChoice);
             if (isValid){
@@ -368,18 +438,24 @@ public class Board {
                     positionH2 = horizontalToDigitConversion(positionH2);
                     if (alignment.equals("H")){
                         if (checkDoubleDigit(positionH, positionH2) + boat.getBoatSize() > boardSize){
-                            System.out.println("Ship can't be placed there, try another co-ordinate!");
+                            if (!auto){
+                                System.out.println("Ship can't be placed there, try another co-ordinate!");
+                            }
                         }else {
                             for (int i = 0; i < boat.getBoatSize(); i++) {
                                 if (boardGrid.get(checkDoubleDigit(positionV, positionV2)).get(checkDoubleDigit(positionH, positionH2) + i).isHasShip()) {
                                     checkState = true;
-                                    System.out.println("A boat is already in this position");
+                                    if (!auto){
+                                        System.out.println("A boat is already in this position");
+                                    }
                                     break;
                                 }
                             }
                             if (!checkState){
                                 boatCheck = boatCheck - 1;
-                                displayShipToConsole(boat);
+                                if (!auto){
+                                    displayShipToConsole(boat);
+                                }
                                 for (int j = 0; j < boat.getBoatSize(); j++){
                                     boardGrid.get(checkDoubleDigit(positionV, positionV2)).get(checkDoubleDigit(positionH, positionH2) + j).state = 'S';
                                     boardGrid.get(checkDoubleDigit(positionV, positionV2)).get(checkDoubleDigit(positionH, positionH2) + j).setHasShip(true);
@@ -391,18 +467,24 @@ public class Board {
                     }
                     if (alignment.equals("V")){
                         if (checkDoubleDigit(positionV,positionV2) + boat.getBoatSize() > boardSize){
-                            System.out.println("Ship can't be placed there, try another co-ordinate!");
+                            if (!auto){
+                                System.out.println("Ship can't be placed there, try another co-ordinate!");
+                            }
                         }else {
                             for (int i = 0; i < boat.getBoatSize(); i++) {
                                 if (boardGrid.get(checkDoubleDigit(positionV, positionV2) + i).get(checkDoubleDigit(positionH, positionH2)).isHasShip()) {
                                     checkState = true;
-                                    System.out.println("A boat is already in this position");
+                                    if (!auto){
+                                        System.out.println("A boat is already in this position");
+                                    }
                                     break;
                                 }
                             }
                             if (!checkState){
                                 boatCheck = boatCheck - 1;
-                                displayShipToConsole(boat);
+                                if (!auto){
+                                    displayShipToConsole(boat);
+                                }
                                 for (int j = 0; j < boat.getBoatSize(); j++){
                                     boardGrid.get(checkDoubleDigit(positionV, positionV2) + j).get(checkDoubleDigit(positionH, positionH2)).state = 'S';
                                     boardGrid.get(checkDoubleDigit(positionV, positionV2) + j).get(checkDoubleDigit(positionH, positionH2)).setHasShip(true);
@@ -417,31 +499,34 @@ public class Board {
         }
     }
 
-    public void placeShip(){
+    public void placeShip(boolean auto){
 
         Scanner sc = new Scanner(System.in);
 
-        renderBoard();
+        renderBoard(false);
         displayShipToConsole(new Boat());
 
         do {
-            renderBoard();
+            renderBoard(false);
             System.out.println("Choose a ship id and where you for like to place it(e.g 1 A3 V)");
             String userChoice = sc.nextLine().toUpperCase(Locale.ROOT).replaceAll("\\s+","");
 
             if (userChoice.length() >= 4 && userChoice.length() <= 6) {
                 if (userChoice.length() == 4){
-                    placeShipWithLength4(userChoice);
+                    placeShipWithLength4(userChoice,auto);
                 }
                 if (userChoice.length() == 5){
-                    placeShipWithLength5(userChoice);
+                    placeShipWithLength5(userChoice,auto);
                 }
                 if (userChoice.length() == 6){
-                    placeShipWithLength6(userChoice);
+                    placeShipWithLength6(userChoice,auto);
                 }
             }
         }while(boatCheck > 0);
     }
+
+
+
 
     public void autoPlaceShip(){
         String id = "";
@@ -466,7 +551,7 @@ public class Board {
                         alignment = "V";
                     }
                     String userChoice = id + positionH + positionV + alignment;
-                    placeShipWithLength4(userChoice);
+                    placeShipWithLength4(userChoice,true);
 
                 }while (!boat.placed);
             }
@@ -487,7 +572,7 @@ public class Board {
                                 alignment = "V";
                             }
                             String userChoice = id + positionH + positionV + alignment;
-                            placeShipWithLength4(userChoice);
+                            placeShipWithLength4(userChoice,true);
 
                         }while (!boat.placed);
                     }
@@ -508,14 +593,14 @@ public class Board {
                                 positionV = String.valueOf(rand.nextInt(10));
                                 positionV2 = " ";
                                 String userChoice = id + positionH + positionH2 + positionV + alignment;
-                                placeShipWithLength5(userChoice);
+                                placeShipWithLength5(userChoice,true);
                             }else{
                                 positionH = digitToHorizontalConversion(String.valueOf(rand.nextInt(10)));
                                 positionH2 = " ";
                                 positionV = String.valueOf(rand.nextInt(2));
                                 positionV2 = String.valueOf(rand.nextInt(boardSize-10));
                                 String userChoice = id + positionH + positionV + positionV2 + alignment;
-                                placeShipWithLength5(userChoice);
+                                placeShipWithLength5(userChoice,true);
                             }
 
                         }while (!boat.placed);
@@ -534,7 +619,7 @@ public class Board {
                                 alignment = "V";
                             }
                             String userChoice = id + positionH + positionH2 + positionV + positionV2 + alignment;
-                            placeShipWithLength6(userChoice);
+                            placeShipWithLength6(userChoice,true);
                         } while(!boat.placed);
 
                     }
@@ -543,6 +628,242 @@ public class Board {
 
     }
 
+    public boolean shootAtShip(){
+        Scanner sc = new Scanner(System.in);
+
+        System.out.println("Opponents board...");
+        renderBoard(true);
+
+        System.out.println("Choose a co-ordinate to fire at ( e.g A3 )");
+        System.out.println("Press 0 to exit or 1 to see ship status: ");
+        String userChoice = sc.nextLine().toUpperCase(Locale.ROOT).replaceAll("\\s+","");
+
+
+        if (userChoice.equals("0")){
+            System.out.println("You have chosen to quit! Thank you for playing battleships");
+            return true;
+        }
+
+        if (userChoice.equals("1")){
+            shootShipStatus();
+        }
+
+        if (userChoice.length() == 2){
+            shootWithLen2(userChoice);
+        }
+        if (userChoice.length() == 3){
+            shootWithLen3(userChoice);
+        }
+        if (userChoice.length() == 4){
+            shootWithLen4(userChoice);
+        }
+        return false;
+    }
+
+    public void autoShootShip(){
+        String positionH = "";
+        String positionH2 = "";
+        String positionV = "";
+        String positionV2 = "";
+
+        if (boardSize <= 10){
+            Random rand = new Random();
+            positionH = digitToHorizontalConversion(String.valueOf(rand.nextInt(boardSize)));
+            positionV = String.valueOf(rand.nextInt(boardSize));
+            String userChoice = positionH + positionV;
+            shootWithLen2(userChoice);
+
+        }
+        if (boardSize > 10){
+            Random rand = new Random();
+            int randomLength = rand.nextInt(4);
+            if (randomLength == 0){
+                positionH = digitToHorizontalConversion(String.valueOf(rand.nextInt(boardSize)));
+                positionV = String.valueOf(rand.nextInt(boardSize));
+                String userChoice = positionH + positionV;
+                shootWithLen2(userChoice);
+            }
+            if (randomLength == 1){
+                positionH = digitToHorizontalConversion(String.valueOf(rand.nextInt(2)));
+                positionH2 = digitToHorizontalConversion(String.valueOf(rand.nextInt(boardSize - 10)));
+                positionV = String.valueOf(rand.nextInt(boardSize));
+                String userChoice = positionH + positionH2 + positionV;
+                shootWithLen3(userChoice);
+            }
+            if (randomLength == 2){
+                positionH = digitToHorizontalConversion(String.valueOf(rand.nextInt(boardSize)));
+                positionV = String.valueOf(rand.nextInt(2));
+                positionV2 = String.valueOf(rand.nextInt(boardSize - 10));
+                String userChoice = positionH + positionV + positionV2;
+                shootWithLen3(userChoice);
+            }
+            if (randomLength == 3){
+                positionH = digitToHorizontalConversion(String.valueOf(rand.nextInt(2)));
+                positionH2 = digitToHorizontalConversion(String.valueOf(rand.nextInt(boardSize - 10)));
+                positionV = String.valueOf(rand.nextInt(2));
+                positionV2 = String.valueOf(rand.nextInt(boardSize - 10));
+                String userChoice = positionH + positionH2 + positionV + positionV2;
+                shootWithLen4(userChoice);
+            }
+        }
+    }
+
+    private void shootWithLen2(String userChoice){
+        boolean isValid = new Checker().shootCheckFor2(userChoice);
+        if (isValid){
+            String positionH = Character.toString(userChoice.charAt(0));
+            positionH = horizontalToDigitConversion(positionH);
+            String positionV = Character.toString(userChoice.charAt(1));
+
+            try{
+                if (boardGrid.get(Integer.parseInt(positionV)).get(Integer.parseInt(positionH)).isHasShip()){
+                    if (boardGrid.get(Integer.parseInt(positionV)).get(Integer.parseInt(positionH)).state != 'H'){
+                        boardGrid.get(Integer.parseInt(positionV)).get(Integer.parseInt(positionH)).state = 'H';
+                        Boat boat = findBoatWithCoordinates(userChoice);
+                        boat.health = boat.health - 1;
+                        if (boat.health == 0){
+                            System.out.println("You have destroyed the " + boat.getBoatName() + " boat!");
+                            inGameBoats.remove(boat);
+
+                        }
+                        System.out.println("HIT!");
+                    } else {
+                        System.out.println("Ship has already been hit");
+                    }
+                } else {
+                    System.out.println("MISSED! there was no ship at that location");
+                    boardGrid.get(Integer.parseInt(positionV)).get(Integer.parseInt(positionH)).state = 'M';
+                }
+            }catch (Exception e){
+                System.out.println("ERROR!");
+            }
+
+        }
+    }
+
+    private void shootWithLen3(String userChoice){
+        int isValid = new Checker().shootCheckFor3(userChoice);
+        if (isValid == 1){
+            //digit
+            String positionH = Character.toString(userChoice.charAt(0));
+            positionH = horizontalToDigitConversion(positionH);
+            String positionV = Character.toString(userChoice.charAt(1));
+            String positionV2 = Character.toString(userChoice.charAt(2));
+
+            try{
+                if (boardGrid.get(checkDoubleDigit(positionV,positionV2)).get(Integer.parseInt(positionH)).isHasShip()){
+                    if (boardGrid.get(checkDoubleDigit(positionV,positionV2)).get(Integer.parseInt(positionH)).state != 'H'){
+                        boardGrid.get(checkDoubleDigit(positionV,positionV2)).get(Integer.parseInt(positionH)).state = 'H';
+                        Boat boat = findBoatWithCoordinates(userChoice);
+                        boat.health = boat.health - 1;
+                        if (boat.health == 0){
+                            System.out.println("You have destroyed the " + boat.getBoatName() + " boat!");
+                            inGameBoats.remove(boat);
+                        }
+                        System.out.println("HIT!");
+                    } else {
+                        System.out.println("Ship has already been hit");
+                    }
+                } else {
+                    System.out.println("MISSED! there was no ship at that location");
+                    boardGrid.get(checkDoubleDigit(positionV,positionV2)).get(Integer.parseInt(positionH)).state = 'M';
+                }
+            } catch (Exception e){
+                System.out.println("ERROR!");
+            }
+
+        }
+        if (isValid == 2){
+            //letter
+            String positionH = Character.toString(userChoice.charAt(0));
+            positionH = horizontalToDigitConversion(positionH);
+            String positionH2 = Character.toString(userChoice.charAt(1));
+            positionH2 = horizontalToDigitConversion(positionH2);
+            String positionV= Character.toString(userChoice.charAt(2));
+
+            try {
+                if (boardGrid.get(Integer.parseInt(positionV)).get(checkDoubleDigit(positionH,positionH2)).isHasShip()){
+                    if (boardGrid.get(Integer.parseInt(positionV)).get(checkDoubleDigit(positionH,positionH2)).state != 'H'){
+                        boardGrid.get(Integer.parseInt(positionV)).get(checkDoubleDigit(positionH,positionH2)).state = 'H';
+                        Boat boat = findBoatWithCoordinates(userChoice);
+                        boat.health = boat.health - 1;
+                        if (boat.health == 0){
+                            System.out.println("You have destroyed the " + boat.getBoatName() + " boat!");
+                            inGameBoats.remove(boat);
+                        }
+                        System.out.println("HIT!");
+                    } else {
+                        System.out.println("Ship has already been hit");
+                    }
+                } else {
+                    System.out.println("MISSED! there was no ship at that location");
+                    boardGrid.get(Integer.parseInt(positionV)).get(checkDoubleDigit(positionH,positionH2)).state = 'M';
+                }
+            } catch (Exception e){
+                System.out.println("ERROR!");
+            }
+        }
+    }
+
+    private void shootWithLen4(String userChoice){
+        boolean isValid = new Checker().shootCheckFor4(userChoice);
+        if (isValid){
+
+            String positionH = Character.toString(userChoice.charAt(0));
+            positionH = horizontalToDigitConversion(positionH);
+            String positionH2 = Character.toString(userChoice.charAt(1));
+            positionH2 = horizontalToDigitConversion(positionH2);
+            String positionV = Character.toString(userChoice.charAt(2));
+            String positionV2 = Character.toString(userChoice.charAt(3));
+
+            try {
+                if (boardGrid.get(checkDoubleDigit(positionV,positionV2)).get(checkDoubleDigit(positionH,positionH2)).isHasShip()){
+                    if (boardGrid.get(checkDoubleDigit(positionV,positionV2)).get(checkDoubleDigit(positionH,positionH2)).state != 'H'){
+                        boardGrid.get(checkDoubleDigit(positionV,positionV2)).get(checkDoubleDigit(positionH,positionH2)).state = 'H';
+                        Boat boat = findBoatWithCoordinates(userChoice);
+                        boat.health = boat.health - 1;
+                        if (boat.health == 0){
+                            System.out.println("You have destroyed the " + boat.getBoatName() + " boat!");
+                            inGameBoats.remove(boat);
+
+                        }
+                        System.out.println("HIT!");
+                    } else {
+                        System.out.println("Ship has already been hit");
+                    }
+                } else {
+                    System.out.println("MISSED! there was no ship at that location");
+                    boardGrid.get(checkDoubleDigit(positionV,positionV2)).get(checkDoubleDigit(positionH,positionH2)).state = 'M';
+                }
+            }catch (Exception e){
+                System.out.println("ERROR!");
+            }
+
+
+        }
+    }
+
+    private void shootShipStatus(){
+        System.out.println("ID   Boat Name             Health ");
+
+        for (Boat boat: inGameBoats) {
+            String str = (boat.getId() + "    " + boat.getBoatName()+ "                 " );
+            String output = new StringBuilder(str).insert(27,boat.getHealth()).toString();
+            System.out.print(output);
+            System.out.println();
+        }
+    }
+
+    private Boat findBoatWithCoordinates(String coordinates){
+        for (Boat boat: boats) {
+            for (String coordinate: boat.coordinatesOnBoard){
+                if (coordinate.equals(coordinates)){
+                    return boat;
+                }
+            }
+        }
+        return new Boat();
+    }
 
     private String horizontalToDigitConversion(String toConvert){
         for (int i = 0; i < horizontalBoarder.size();i++){
@@ -572,12 +893,15 @@ public class Board {
         return num1ToInt + num2ToInt;
     }
 
-    private String doubleDigitConversion(String str){
-        if (str.equals("0")){
-            return "1";
-        }
-        return str;
+
+    public List<Boat> getInGameBoats() {
+        return inGameBoats;
     }
+
+    public void setInGameBoats(List<Boat> inGameBoats) {
+        this.inGameBoats = inGameBoats;
+    }
+
     public int getBoardSize() {
         return boardSize;
     }
