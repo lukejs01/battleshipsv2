@@ -3,7 +3,7 @@ package model;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Boat {
+public class Boat { // sets some variables used to update different boat statuses
     private int id = 0;
     private String boatName = "";
     private int boatSize = 0;
@@ -11,30 +11,20 @@ public class Boat {
     public boolean placed = false;
     public List<String> coordinatesOnBoard = new ArrayList<>();
 
-    public Boat(int id, String boatName, int boatSize, int health) {
+    public Boat(int id, String boatName, int boatSize, int health) { // constructor for new boat
         this.id = id;
         this.boatName = boatName;
         this.boatSize = boatSize;
         this.health = health;
     }
 
-    public Boat() {
+    public Boat() { // no args constructor
     }
 
-    public List<String> getCoordinatesOnBoard() {
-        return coordinatesOnBoard;
-    }
-
-    public void setCoordinatesOnBoard(List<String> coordinatesOnBoard) {
-        this.coordinatesOnBoard = coordinatesOnBoard;
-    }
+// getters and setters
 
     public int getId() {
         return id;
-    }
-
-    public void setId(int id) {
-        this.id = id;
     }
 
     public String getBoatName() {
@@ -49,23 +39,12 @@ public class Boat {
         this.placed = placed;
     }
 
-    public void setBoatName(String boatName) {
-        this.boatName = boatName;
-    }
-
     public int getBoatSize() {
         return boatSize;
-    }
-
-    public void setBoatSize(int boatSize) {
-        this.boatSize = boatSize;
     }
 
     public int getHealth() {
         return health;
     }
 
-    public void setHealth(int health) {
-        this.health = health;
-    }
 }
