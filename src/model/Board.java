@@ -236,7 +236,7 @@ public class Board {
                                     boardGrid.get(Integer.parseInt(positionV) + j).get(Integer.parseInt(positionH)).setHasShip(true);
                                     String posVHolder = positionV;
                                     if (Integer.parseInt(positionV) + j >= 10){
-                                        posVHolder = "0" + (((Integer.parseInt(positionV) + j)%10));
+                                        posVHolder = "0" + (((Integer.parseInt(positionV) + j) % 10));
                                     } else {
                                         posVHolder = String.valueOf(Integer.parseInt(positionV) + j);
                                     }
