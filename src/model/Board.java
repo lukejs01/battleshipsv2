@@ -122,7 +122,7 @@ public class Board {
                 state = "";
             }
         }
-        if (cellSize == 0 || boardSize == 0){ // setting default sizes if the user somehow messes up the txt file
+        if (cellSize <= 0 || boardSize <= 0){ // setting default sizes if the user somehow messes up the txt file
             boardSize = DEFAULT_BOARD_SIZE;
             cellSize = DEFAULT_CELL_SIZE;
 
